@@ -32,14 +32,14 @@ try:
     if not os.path.exists(IMAGE_DIR):
         try:
             os.makedirs(IMAGE_DIR, mode=655)
-            os.system('cp *.png %s' % IMAGE_DIR)
+            os.system('cp img/*.png %s' % IMAGE_DIR)
         except:
             print "Error copyng images directory"
             sys.exit()
     else:
         try:
             print "Found a previuos installation of %s.\nJust copy necessaries file" % FULL_NAME
-            os.system('cp *.png %s' % IMAGE_DIR)
+            os.system('cp img/*.png %s' % IMAGE_DIR)
         except:
             print "Error copyng images directory"
             sys.exit()
@@ -47,16 +47,16 @@ try:
     if not os.path.exists(GLADE_DIR):
         try:
             os.makedirs(GLADE_DIR, mode=655)
-            os.system('cp *.glade %s' % GLADE_DIR)
-            os.system('cp *.png %s' % GLADE_DIR)
+            os.system('cp glade/*.glade %s' % GLADE_DIR)
+            os.system('cp img/*.png %s' % GLADE_DIR)
         except:
             print "Error copyng glade directory"
             sys.exit()
     else:
         try:
             print "Found a previuos installation of %s.\nJust copy necessaries file" % FULL_NAME
-            os.system('cp *.glade %s' % GLADE_DIR)
-            os.system('cp *.png %s' % GLADE_DIR)
+            os.system('cp glade/*.glade %s' % GLADE_DIR)
+            os.system('cp img/*.png %s' % GLADE_DIR)
         except:
             print "Error copyng glade directory"
             sys.exit()
