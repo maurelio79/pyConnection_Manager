@@ -72,6 +72,11 @@ class PyCmPrefs(Gtk.Window):
 
         self.w_prefs = self.builder_prefs.get_object('window-prefs')
 
+        # images
+        ipath = pixmapfile('utilities-terminal.png')
+        img = GdkPixbuf.Pixbuf.new_from_file(ipath)
+        self.w_prefs.set_icon(img)
+
         # Get all object for prefs window
 
             # Object from pycm tab
@@ -302,6 +307,11 @@ class PyCm(object):
 
         w = builder.get_object('window-root')
 
+        # images
+        ipath = pixmapfile('utilities-terminal.png')
+        img = GdkPixbuf.Pixbuf.new_from_file(ipath)
+        w.set_icon(img)
+
         self.entry_user = builder.get_object('entry_user')
 
         self.notebook = builder.get_object('notebook')
@@ -365,8 +375,9 @@ class PyCm(object):
             self.lines = self.client.get_int(KEY('/general/scrollback'))
             self.term.set_scrollback_lines(self.lines)
             self.command = self.client.get_string(KEY('/general/command'))
-            self.length_command = len(self.command) + 1
-            self.term.feed_child(self.command + "\n", self.length_command)
+            if self.command != "":
+                self.length_command = len(self.command) + 1
+                self.term.feed_child(self.command + "\n", self.length_command)
             
         except:
             print "I can't load user preference. I will load a basic standard terminal."
