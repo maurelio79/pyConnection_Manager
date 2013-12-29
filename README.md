@@ -10,3 +10,5 @@ Anyway it's already an esay to use terminal emulator!
 
 To test it download the zip and run
 <pre>python setup.py</pre>
+
+<a href="https://github.com/maurelio79/pyConnection_Manager/wiki">Wiki</a>
