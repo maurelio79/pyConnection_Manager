@@ -30,7 +30,7 @@ term_list = []
 
 
 
-class PyCmAbout(object):
+class PyCmAbout(Gtk.AboutDialog):
     """The About pyConnection Manager dialog class
     """
     def __init__(self):
@@ -43,15 +43,28 @@ class PyCmAbout(object):
         self.w_about = self.builder_about.get_object('aboutdialog')
 
         # images
-        ipath = pixmapfile('utilities-terminal.png')
-        img = GdkPixbuf.Pixbuf.new_from_file(ipath)
-        self.w_about.set_property('logo', img)
+        self.ipath = pixmapfile('utilities-terminal.png')
+        self.img = GdkPixbuf.Pixbuf.new_from_file(self.ipath)
+        self.w_about.set_property('logo', self.img)
 
         self.w_about.set_name('pyConnection Manager')
         self.w_about.set_version(VERSION)
 
-        self.w_about.show_all()
+        signals = {
+            "on_aboutdialog-action_area2_delete_event" : self.delete,
+            "on_aboutdialog-action_area2_destroy_event" : self.delete,
+            "on_aboutdialog_delete_event" : self.delete,
+            "on_aboutdialog_destroy_event" : self.delete,
+            "on_aboutdialog_response" : self.delete,
+        }
 
+        self.builder_about.connect_signals(signals)
+
+        self.w_about.show_all()
+    
+
+    def delete(self, widget, response):
+        self.w_about.destroy()
 
 
 class PyCmPrefs(Gtk.Window):
@@ -73,9 +86,9 @@ class PyCmPrefs(Gtk.Window):
         self.w_prefs = self.builder_prefs.get_object('window-prefs')
 
         # images
-        ipath = pixmapfile('utilities-terminal.png')
-        img = GdkPixbuf.Pixbuf.new_from_file(ipath)
-        self.w_prefs.set_icon(img)
+        self.ipath = pixmapfile('utilities-terminal.png')
+        self.img = GdkPixbuf.Pixbuf.new_from_file(self.ipath)
+        self.w_prefs.set_icon(self.img)
 
         # Get all object for prefs window
 
@@ -308,9 +321,9 @@ class PyCm(object):
         w = builder.get_object('window-root')
 
         # images
-        ipath = pixmapfile('utilities-terminal.png')
-        img = GdkPixbuf.Pixbuf.new_from_file(ipath)
-        w.set_icon(img)
+        self.ipath = pixmapfile('utilities-terminal.png')
+        self.img = GdkPixbuf.Pixbuf.new_from_file(self.ipath)
+        w.set_icon(self.img)
 
         self.entry_user = builder.get_object('entry_user')
 

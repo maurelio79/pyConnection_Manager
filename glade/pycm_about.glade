@@ -4,13 +4,21 @@
   <object class="GtkAboutDialog" id="aboutdialog">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
+    <property name="resizable">False</property>
+    <property name="window_position">center</property>
     <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
     <property name="program_name">pyConnection Manager</property>
     <property name="comments" translatable="yes">pyConnection Manager is an easy to use tabbed
 terminal to manage multiple ssh connections.</property>
+    <property name="website">https://github.com/maurelio79/pyConnection_Manager</property>
+    <property name="website_label" translatable="yes">pyConnection Manager on GitHub</property>
     <property name="license" translatable="yes">GPLv3</property>
     <property name="authors">Mauro Lomartire</property>
     <property name="license_type">gpl-3-0</property>
+    <signal name="destroy-event" handler="on_aboutdialog_destroy_event" swapped="no"/>
+    <signal name="delete-event" handler="on_aboutdialog_delete_event" swapped="no"/>
+    <signal name="response" handler="on_aboutdialog_response" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="aboutdialog-vbox2">
         <property name="can_focus">False</property>
@@ -20,6 +28,8 @@ terminal to manage multiple ssh connections.</property>
           <object class="GtkButtonBox" id="aboutdialog-action_area2">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
+            <signal name="destroy-event" handler="on_aboutdialog-action_area2_destroy_event" swapped="no"/>
+            <signal name="delete-event" handler="on_aboutdialog-action_area2_delete_event" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>

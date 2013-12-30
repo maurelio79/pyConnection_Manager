@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkListStore" id="liststore1"/>
+  <object class="GtkTreeStore" id="treestore">
+    <columns>
+      <!-- column-name display_name -->
+      <column type="gchar"/>
+      <!-- column-name full_name -->
+      <column type="gchar"/>
+      <!-- column-name ip_address -->
+      <column type="gchar"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="window-root">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">pyConnection Manager</property>
     <property name="default_width">960</property>
     <property name="default_height">720</property>
-    <property name="icon">utilities-terminal.png</property>
     <signal name="destroy" handler="on_window-root_destroy" swapped="no"/>
     <child>
       <object class="GtkVBox" id="mainframe">
