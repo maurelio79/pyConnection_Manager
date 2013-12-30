@@ -69,10 +69,13 @@ try:
     except:
         print "Error copyng pycm executable"
         sys.exit()
+
+    print "Installation ok"
+        
 except:
     print "INSTALLATION ERROR"
     sys.exit()
 
 
-print "Installation ok"
+
 
