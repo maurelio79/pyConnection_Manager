@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys, shutil
 
 try:
     from gi.repository import Gtk, Gdk, Vte, GLib, Pango, GConf, GdkPixbuf
@@ -6,76 +7,63 @@ try:
     from pycm.pycm_globals import *
 except ImportError as e:
     print "Error during importing of necessaries modules.\nError is '%s'" % e
-
-import sys
-
-
-python_path = "/usr/lib/python2.7/dist-packages/"
-uid = os.getuid()
-
-
-try:
-    if uid > 0:
-        print "You need to be root to install %s" % FULL_NAME
-        sys.exit()
-
-    if not os.path.exists(python_path):
-        print "I can't find %s" % python_path
-        sys.exit()
-    else:
-        try:
-            os.system('cp -R pycm %s' % python_path)
-        except:
-            print "Error copyng pycm directory"
-            sys.exit()
-
-    if not os.path.exists(IMAGE_DIR):
-        try:
-            os.makedirs(IMAGE_DIR, mode=655)
-            os.system('cp img/*.png %s' % IMAGE_DIR)
-        except:
-            print "Error copyng images directory"
-            sys.exit()
-    else:
-        try:
-            print "Found a previuos installation of %s.\nJust copy necessaries file" % FULL_NAME
-            os.system('cp img/*.png %s' % IMAGE_DIR)
-        except:
-            print "Error copyng images directory"
-            sys.exit()
-
-    if not os.path.exists(GLADE_DIR):
-        try:
-            os.makedirs(GLADE_DIR, mode=655)
-            os.system('cp glade/*.glade %s' % GLADE_DIR)
-            os.system('cp img/*.png %s' % GLADE_DIR)
-        except:
-            print "Error copyng glade directory"
-            sys.exit()
-    else:
-        try:
-            print "Found a previuos installation of %s.\nJust copy necessaries file" % FULL_NAME
-            os.system('cp glade/*.glade %s' % GLADE_DIR)
-            os.system('cp img/*.png %s' % GLADE_DIR)
-        except:
-            print "Error copyng glade directory"
-            sys.exit()
-
-    #os.system('ln -s %s%s /usr/share/pyshared/%s' % (python_path, NAME, NAME)) 
-    try:
-        os.system('cp -f pycm.py /usr/bin/')
-        os.system('chmod +x /usr/bin/pycm.py')
-        os.system('cp -f pyconnection-manager.desktop /usr/share/applications/')
-    except:
-        print "Error copyng pycm executable"
-        sys.exit()
-
-    print "Installation ok"
-        
-except:
-    print "INSTALLATION ERROR"
     sys.exit()
 
 
+python_path = "/usr/lib/python2.7/dist-packages/"
+module_path = python_path + 'pycm'
+bin_exe = '/usr/bin/pycm.py'
+launcher = '/usr/share/applications/pycm-manager.desktop'
+uid = os.getuid()
 
 
+def __init__():
+    if uid > 0:
+        print "You need to be root to install pyConnection Manager"
+        sys.exit()
+
+    try:
+        remove_old()
+    except OSError, IOError:
+        print "ERROR removing old stuff"
+        sys.exit()
+
+    try:
+        create_new()
+    except OSError, IOError:
+        print "ERROR installing pyConnection Manager"
+        sys.exit()
+
+    ok = "\n\tpyConnection Manager succesfully installed\n"
+    print ok
+
+def remove_old():
+    if os.path.exists(module_path):
+        shutil.rmtree(module_path)
+
+    if os.path.exists(GLADE_DIR):
+        shutil.rmtree(GLADE_DIR)
+
+    if os.path.exists(IMAGE_DIR):
+        shutil.rmtree(IMAGE_DIR)
+
+    if os.path.exists(bin_exe):
+        os.remove(bin_exe)
+
+    if os.path.exists(launcher):
+        os.remove(launcher)
+
+def create_new():
+    shutil.copytree('pycm', module_path)
+    shutil.copytree('glade', GLADE_DIR)
+    shutil.copytree('img', IMAGE_DIR)
+
+    shutil.copyfile('pycm.py', '/usr/bin/pycm')
+    shutil.copyfile('pyconnection-manager.desktop', launcher)
+
+    dir_list = [module_path, GLADE_DIR, IMAGE_DIR]
+
+    for i in dir_list:
+        os.chmod(i, 655)
+
+__init__()
