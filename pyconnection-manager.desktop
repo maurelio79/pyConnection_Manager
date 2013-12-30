@@ -1,15 +1,11 @@
 [Desktop Entry]
 Name=pyConnection Manager
-Comment=Tabbed shell for ssh connection
-TryExec=python pycm.py
-Exec=python pycm.py
-Icon=utilities-terminal
+Name[it_IT]=pyConnection Manager
+Comment=Tabbed terminal for ssh connection
+Comment[it]=Terminale a tab per connessioni ssh
+Icon=/usr/share/pixmaps/pycm/utilities-terminal.png
+Terminal=false
 Type=Application
-Categories=GNOME;GTK;Utility;TerminalEmulator;
-StartupNotify=true
-OnlyShowIn=GNOME;Unity;
-Keywords=Run;
-Actions=New
-X-Ubuntu-Gettext-Domain=pyConnection Manager
-
-Name[it_IT]=pyconnection-mamanger
+StartupNotify=false
+Exec=python /usr/bin/pycm
+Categories=GNOME;GTK;Utility;TerminalEmulator
