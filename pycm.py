@@ -68,10 +68,9 @@ class PyCmAbout(Gtk.AboutDialog):
 
 
 class PyCmPrefs(Gtk.Window):
-    """This class manage user preferences stored in prefs.json
+    """This class manage user preferences stored in gconf file.
         The class load preference into the preference gui when the user call it;
-        load preference for the PyCm main class;
-        and save preference in prefs.json.
+        and also save prefernce when user chenge them.
     """
 
     def __init__(self):
@@ -90,55 +89,58 @@ class PyCmPrefs(Gtk.Window):
         self.img = GdkPixbuf.Pixbuf.new_from_file(self.ipath)
         self.w_prefs.set_icon(self.img)
 
-        # Get all object for prefs window
+
+        # Get all object for prefs window and load widget value from gconf.
 
             # Object from pycm tab
         self.filechooserbutton = self.builder_prefs.get_object('filechooserbutton')
         #self.entry_user = self.builder_prefs.get_object('entry-user')
 
+
             # Object from style and apparence tab
         self.bg_colorbutton = self.builder_prefs.get_object('bg-colorbutton')
-        self.fg_colorbutton = self.builder_prefs.get_object('fg-colorbutton')
-        self.font_button = self.builder_prefs.get_object('font-button')
-        self.hscale_opacity = self.builder_prefs.get_object('hscale-opacity')
-
-            # Object from terminal tab
-        self.shellcombo = self.builder_prefs.get_object('shell_combo')
-        self.spin_scrollback = self.builder_prefs.get_object('spin-scrollback')
-        self.switch_vbar = self.builder_prefs.get_object('switch-vbar')
-        self.entry_command = self.builder_prefs.get_object('entry-command')
-        self.switch_fullscreen = self.builder_prefs.get_object('switch-fullscreen')
-
-        self.button_save = self.builder_prefs.get_object('button-save')
-
-
-
-        
-        # Load object value from gconf file into pref object
-
-            # Load value for object in style and apparence tab
         self.bg_colorbutton_color = Gdk.color_parse(self.client.get_string(KEY('/style/background/color')))
         self.bg_colorbutton.set_color(self.bg_colorbutton_color)
+
+        self.fg_colorbutton = self.builder_prefs.get_object('fg-colorbutton')
         self.fg_colorbutton_color = Gdk.color_parse(self.client.get_string(KEY('/style/font/color')))
         self.fg_colorbutton.set_color(self.fg_colorbutton_color)
+        
+        self.font_button = self.builder_prefs.get_object('font-button')
         self.font_button_font = self.client.get_string(KEY('/style/font/style'))
         self.font_button.set_font_name(self.font_button_font)
+        
+        self.hscale_opacity = self.builder_prefs.get_object('hscale-opacity')
         self.opacity_value = self.client.get_int(KEY('/style/background/transparency'))
         self.hscale_opacity.set_value(self.opacity_value)
 
-            # Load value for object in terminal tab
+
+            # Object from terminal tab
+        self.shellcombo = self.builder_prefs.get_object('shell_combo')
         self.load_shells_combo()
         self.shellvalue_id = self.client.get_int(KEY('/general/default_shell_id'))
         self.shellcombo.set_active(self.shellvalue_id)
+
+        self.spin_scrollback = self.builder_prefs.get_object('spin-scrollback')
         self.scrollback_lines = self.client.get_int(KEY('/general/scrollback'))
         self.spin_scrollback.set_value(self.scrollback_lines)
+        
+        self.switch_vbar = self.builder_prefs.get_object('switch-vbar')
         self.vbar_bool = self.client.get_bool(KEY('/general/vbar'))
         self.switch_vbar.set_active(self.vbar_bool)
-        self.fullscreen_bool = self.client.get_bool(KEY('/general/fullscreen'))
-        self.switch_fullscreen.set_active(self.fullscreen_bool)
+        
+        self.entry_command = self.builder_prefs.get_object('entry-command')
         self.command = self.client.get_string(KEY('/general/command'))
         if self.command is not None:
             self.entry_command.set_text(self.command)
+        
+        self.switch_fullscreen = self.builder_prefs.get_object('switch-fullscreen')
+        self.fullscreen_bool = self.client.get_bool(KEY('/general/fullscreen'))
+        self.switch_fullscreen.set_active(self.fullscreen_bool)
+
+        
+        self.button_save = self.builder_prefs.get_object('button-save')
+
 
 
         signals = {
@@ -162,6 +164,8 @@ class PyCmPrefs(Gtk.Window):
     def delete(self, widget):
         self.w_prefs.destroy()
 
+
+    # All function above just write value in gconf file when user change preference.
 
     def set_bg(self, widget):
         self.color = hexify_color(self.bg_colorbutton.get_color())
@@ -192,7 +196,7 @@ class PyCmPrefs(Gtk.Window):
         #else:
         self.client.set_string(KEY('/general/default_shell'), self.shell)
 
-        # I will also save the id of shell to easily load then in the gui
+        # I will also save the id of shell to easily load then in the combo box
         self.shell_id = self.shellcombo.get_active()
         self.client.set_int(KEY('/general/default_shell_id'), int(self.shell_id))
 
@@ -224,6 +228,8 @@ class PyCmPrefs(Gtk.Window):
         self.client.set_string(KEY('/general/command'), self.command)
 
 
+
+
 class GConfHandler(object):
     """Handles gconf changes, if any gconf variable is changed, a
     different method is called to handle this change.
@@ -246,6 +252,8 @@ class GConfHandler(object):
         notify_add(KEY('/style/background/transparency'), self.opacity_changed, None)
         notify_add(KEY('/general/scrollback'), self.scrollback_changed, None)
         notify_add(KEY('/general/vbar'), self.vbar_changed, None)
+
+    # All function below, change immediately style, apparence, ecc of main window and terminal.
 
     def fstyle_changed(self, client, connection_id, entry, data):
         """If the gconf var style/font/style be changed, this method
@@ -332,6 +340,7 @@ class PyCmBoxTerminal(Gtk.HBox):
         self.scroll = Gtk.VScrollbar(adj)
         self.scroll.set_no_show_all(True)
         self.pack_start(self.scroll, False, False, 0)
+
 
 
 
