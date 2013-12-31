@@ -223,18 +223,24 @@ class PyCmPrefs(Gtk.Window):
         self.command = self.entry_command.get_text()
         self.client.set_string(KEY('/general/command'), self.command)
 
-
-
+class GConfWindowHandler(object):
+    """Handles gconf change fro entire window.
+    If any gconf variable is changed, a
+    different method is called to handle this change.
+    """
+    def __init__():
+        pass
 
 class GConfHandler(object):
     """Handles gconf changes, if any gconf variable is changed, a
     different method is called to handle this change.
     """
-    def __init__(self, term):
+    def __init__(self, window, term):
         """Constructor of GConfHandler, just add the term dir to the
         gconf client and bind the keys to its handler methods.
         """
         self.term = term
+        self.window = window
 
         client = GConf.Client.get_default()
         client.add_dir(GCONF_PATH, GConf.ClientPreloadType.PRELOAD_RECURSIVE)
@@ -271,9 +277,9 @@ class GConfHandler(object):
             i.set_color_foreground(fgcolor)
 
     def opacity_changed(self, client, connection_id, entry, data):
-        #opacity = client.get_int(KEY('/style/background/transparency'))
-        #client.set_opacity((int((100 - opacity) / 100.0)))
-        pass
+        opacity = client.get_int(KEY('/style/background/transparency'))
+        self.window.set_opacity((100 - opacity) / 100.0)
+        
 
 
     def scrollback_changed(self, client, connection_id, entry, data):
@@ -386,7 +392,7 @@ class PyCm(object):
 
         self.notebook.next_page()
 
-        GConfHandler(self.hbox.term)
+        GConfHandler(w, self.hbox.term)
 
         self.fullscreen = self.client.get_bool(KEY('/general/fullscreen'))
         if self.fullscreen:
