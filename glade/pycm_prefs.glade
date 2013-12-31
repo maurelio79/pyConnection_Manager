@@ -9,20 +9,20 @@
     <property name="page_size">0.10000000000000001</property>
   </object>
   <object class="GtkAdjustment" id="adj-scrollback">
-    <property name="upper">10000</property>
+    <property name="upper">1000</property>
     <property name="value">256</property>
-    <property name="step_increment">1</property>
+    <property name="step_increment">100</property>
     <property name="page_increment">1</property>
   </object>
   <object class="GtkWindow" id="window-prefs">
     <property name="width_request">440</property>
-    <property name="height_request">580</property>
+    <property name="height_request">520</property>
     <property name="can_focus">False</property>
     <property name="border_width">10</property>
     <property name="title" translatable="yes">pyConnection Manager Preference</property>
     <property name="resizable">False</property>
     <property name="default_width">440</property>
-    <property name="default_height">580</property>
+    <property name="default_height">520</property>
     <child>
       <object class="GtkBox" id="box1">
         <property name="visible">True</property>
@@ -424,22 +424,6 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spin-scrollback">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="invisible_char">●</property>
-                        <property name="adjustment">adj-scrollback</property>
-                        <property name="numeric">True</property>
-                        <signal name="value-changed" handler="on_spin-scrollback_value_changed" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">2</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
-                      </packing>
-                    </child>
-                    <child>
                       <object class="GtkSwitch" id="switch-vbar">
                         <property name="can_focus">False</property>
                         <property name="no_show_all">True</property>
@@ -460,11 +444,8 @@
                           <object class="GtkEntry" id="entry-command">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="has_focus">True</property>
-                            <property name="is_focus">True</property>
                             <property name="max_length">50</property>
                             <property name="invisible_char">●</property>
-                            <property name="overwrite_mode">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -491,6 +472,23 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">1</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScale" id="spin-scrollback">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="adjustment">adj-scrollback</property>
+                        <property name="round_digits">1</property>
+                        <property name="digits">0</property>
+                        <property name="value_pos">right</property>
+                        <signal name="value-changed" handler="on_spin-scrollback_value_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">2</property>
                         <property name="width">1</property>
                         <property name="height">1</property>
                       </packing>

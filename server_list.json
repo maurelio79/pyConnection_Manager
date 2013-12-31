@@ -1,0 +1,29 @@
+{ 
+    "dir1" : {
+        
+        "dpl101" : { 
+            "server_name" : "dpl101",
+            "full_name" : "dpl101.dapersico"
+        },
+
+        "dpl102" : { 
+            "server_name" : "dpl102",
+            "full_name" : "dpl102.dapersico"
+        }
+
+    },
+
+    "dir2" : {
+        
+        "dpl103" : { 
+            "server_name" : "dpl103",
+            "full_name" : "dpl103.dapersico"
+        },
+
+        "dpl104" : { 
+            "server_name" : "dpl104",
+            "full_name" : "dpl104.dapersico"
+        }
+
+    } 
+}

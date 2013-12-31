@@ -13,7 +13,7 @@ except ImportError as e:
 python_path = "/usr/lib/python2.7/dist-packages/"
 module_path = python_path + 'pycm'
 bin_exe = '/usr/bin/pycm.py'
-launcher = '/usr/share/applications/pycm-manager.desktop'
+launcher = '/usr/share/applications/pyconnection-manager.desktop'
 uid = os.getuid()
 
 
