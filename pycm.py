@@ -223,13 +223,6 @@ class PyCmPrefs(Gtk.Window):
         self.command = self.entry_command.get_text()
         self.client.set_string(KEY('/general/command'), self.command)
 
-class GConfWindowHandler(object):
-    """Handles gconf change fro entire window.
-    If any gconf variable is changed, a
-    different method is called to handle this change.
-    """
-    def __init__():
-        pass
 
 class GConfHandler(object):
     """Handles gconf changes, if any gconf variable is changed, a
