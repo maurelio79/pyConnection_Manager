@@ -100,13 +100,14 @@ class PyCmPrefs(Gtk.Window):
         self.bg_colorbutton = self.builder_prefs.get_object('bg-colorbutton')
         self.fg_colorbutton = self.builder_prefs.get_object('fg-colorbutton')
         self.font_button = self.builder_prefs.get_object('font-button')
-        #self.hscale_opacity = self.builder_prefs.get_object('hscale-opacity')
+        self.hscale_opacity = self.builder_prefs.get_object('hscale-opacity')
 
             # Object from terminal tab
         self.shellcombo = self.builder_prefs.get_object('shell_combo')
         self.spin_scrollback = self.builder_prefs.get_object('spin-scrollback')
         self.switch_vbar = self.builder_prefs.get_object('switch-vbar')
         self.entry_command = self.builder_prefs.get_object('entry-command')
+        self.switch_fullscreen = self.builder_prefs.get_object('switch-fullscreen')
 
         self.button_save = self.builder_prefs.get_object('button-save')
 
@@ -123,7 +124,7 @@ class PyCmPrefs(Gtk.Window):
         self.font_button_font = self.client.get_string(KEY('/style/font/style'))
         self.font_button.set_font_name(self.font_button_font)
         self.opacity_value = self.client.get_int(KEY('/style/background/transparency'))
-        #self.hscale_opacity.set_value(int(self.opacity_value))
+        self.hscale_opacity.set_value(self.opacity_value)
 
             # Load value for object in terminal tab
         self.load_shells_combo()
@@ -133,6 +134,8 @@ class PyCmPrefs(Gtk.Window):
         self.spin_scrollback.set_value(self.scrollback_lines)
         self.vbar_bool = self.client.get_bool(KEY('/general/vbar'))
         self.switch_vbar.set_active(self.vbar_bool)
+        self.fullscreen_bool = self.client.get_bool(KEY('/general/fullscreen'))
+        self.switch_fullscreen.set_active(self.fullscreen_bool)
         self.command = self.client.get_string(KEY('/general/command'))
         if self.command is not None:
             self.entry_command.set_text(self.command)
@@ -144,10 +147,11 @@ class PyCmPrefs(Gtk.Window):
             "on_bg-colorbutton_color_set" : self.set_bg,
             "on_fg-colorbutton_color_set" : self.set_fg,
             "on_font-button_font_set" : self.set_font,
-            #"on_hscale-opacity_value_changed" : self.set_opacity,
+            "on_hscale-opacity_value_changed" : self.set_opacity,
             "on_shell_combo_changed" : self.set_shell,
             "on_spin-scrollback_value_changed" : self.set_scrollback,
             "on_switch-vbar_toggled" : self.set_vbar,
+            "on_switch-fullscreen_toggled" : self.set_fullscreen,
             "on_button-command_clicked" : self.set_command,
         }
 
@@ -173,7 +177,8 @@ class PyCmPrefs(Gtk.Window):
 
     def set_opacity(self, widget):
         self.opacity = self.hscale_opacity.get_value()
-        self.client.set_int(KEY('/style/background/transparency'), int(self.opacity))
+        print self.opacity
+        self.client.set_int(KEY('/style/background/transparency'), self.opacity)
 
     def set_shell(self, widget):
         self.citer = self.shellcombo.get_active_iter()
@@ -210,6 +215,10 @@ class PyCmPrefs(Gtk.Window):
         self.use_vbar = self.switch_vbar.get_active()
         self.client.set_bool(KEY('/general/vbar'), self.use_vbar)
 
+    def set_fullscreen(self, widget):
+        self.is_fullscreen = self.switch_fullscreen.get_active()
+        self.client.set_bool(KEY('/general/fullscreen'), self.is_fullscreen)
+
     def set_command(self, widget):
         self.command = self.entry_command.get_text()
         self.client.set_string(KEY('/general/command'), self.command)
@@ -235,7 +244,7 @@ class GConfHandler(object):
         notify_add(KEY('/style/font/style'), self.fstyle_changed, None)
         notify_add(KEY('/style/font/color'), self.fcolor_changed, None)
         notify_add(KEY('/style/background/color'), self.bgcolor_changed, None)
-        #notify_add(KEY('/style/background/transparency'), self.opacity_changed, None)
+        notify_add(KEY('/style/background/transparency'), self.opacity_changed, None)
         notify_add(KEY('/general/scrollback'), self.scrollback_changed, None)
         notify_add(KEY('/general/vbar'), self.vbar_changed, None)
 
@@ -262,9 +271,10 @@ class GConfHandler(object):
             i.set_color_foreground(fgcolor)
 
     def opacity_changed(self, client, connection_id, entry, data):
-        opacity = client.get_int(KEY('/style/background/transparency'))
-        for i in term_list:
-            i.set_opacity(opacity)
+        #opacity = client.get_int(KEY('/style/background/transparency'))
+        #client.set_opacity((int((100 - opacity) / 100.0)))
+        pass
+
 
     def scrollback_changed(self, client, connection_id, entry, data):
         
@@ -378,8 +388,16 @@ class PyCm(object):
 
         GConfHandler(self.hbox.term)
 
+        self.fullscreen = self.client.get_bool(KEY('/general/fullscreen'))
+        if self.fullscreen:
+            w.fullscreen()
+
+        self.opacity = self.client.get_int(KEY('/style/background/transparency'))
+        w.set_opacity((100 - self.opacity) / 100.0)
+
         w.show_all()
         self.hbox.term.grab_focus()
+
         self.load_config()
         term_list.append(self.hbox.term)
 
@@ -417,8 +435,7 @@ class PyCm(object):
             if self.scrollbar:
                 self.hbox.scroll.show()
             else:
-                self.hbox.scroll.hide()
-            
+                self.hbox.scroll.hide()            
         except:
             print "I can't load user preference. I will load a basic standard terminal."
 

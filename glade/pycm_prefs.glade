@@ -2,11 +2,10 @@
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkAdjustment" id="adj-opacity">
-    <property name="upper">1.1000000000000001</property>
-    <property name="value">1</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">0.10000000000000001</property>
-    <property name="page_size">0.10000000000000001</property>
+    <property name="upper">90</property>
+    <property name="step_increment">10</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
   </object>
   <object class="GtkAdjustment" id="adj-scrollback">
     <property name="upper">1000</property>
@@ -280,10 +279,11 @@
                     </child>
                     <child>
                       <object class="GtkLabel" id="label11">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="no_show_all">True</property>
                         <property name="halign">start</property>
-                        <property name="label" translatable="yes">Opacity</property>
+                        <property name="label" translatable="yes">Transparency
+(need application restart)</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -294,12 +294,13 @@
                     </child>
                     <child>
                       <object class="GtkScale" id="hscale-opacity">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="no_show_all">True</property>
                         <property name="adjustment">adj-opacity</property>
-                        <property name="show_fill_level">True</property>
-                        <property name="round_digits">1</property>
+                        <property name="round_digits">0</property>
+                        <property name="digits">0</property>
                         <property name="value_pos">right</property>
+                        <signal name="value-changed" handler="on_hscale-opacity_value_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -489,6 +490,37 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">3</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label16">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Start fullscreen</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">4</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="switch-fullscreen">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="use_stock">True</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_switch-fullscreen_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">4</property>
                         <property name="width">1</property>
                         <property name="height">1</property>
                       </packing>
