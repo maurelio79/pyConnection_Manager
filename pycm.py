@@ -147,7 +147,7 @@ class PyCmPrefs(Gtk.Window):
             #"on_hscale-opacity_value_changed" : self.set_opacity,
             "on_shell_combo_changed" : self.set_shell,
             "on_spin-scrollback_value_changed" : self.set_scrollback,
-            "on_switch-vbar_activate" : self.set_vbar,
+            "on_switch-vbar_toggled" : self.set_vbar,
             "on_button-command_clicked" : self.set_command,
         }
 
@@ -273,16 +273,15 @@ class GConfHandler(object):
             i.set_scrollback_lines(lines)
 
     def vbar_changed(self, client, connection_id, entry, data):
-    #    vbar = client.get_bool('/general/vbar')
-    #    for i in term.term_list:
-    #        hbox = i.get_parent()
-    #        terminal, scrollbar = hbox.get_children()
-    #        if entry.value.get_bool():
-    #            scrollbar.show()
-    #        else:
-    #            scrollbar.hide()
-        pass
-
+        vbar = client.get_bool(KEY('/general/vbar'))
+        for i in term_list:
+            hbox = i.get_parent()
+            terminal, scrollbar = hbox.get_children()
+            if vbar == True:
+                scrollbar.show()
+            else:
+                scrollbar.hide()
+        
 
 
 
@@ -305,6 +304,28 @@ class PyCmTerminal(Vte.Terminal):
 
 
 
+class PyCmBoxTerminal(Gtk.HBox):
+    """Create a box container for terminal. I need this in case user wants to add a scrollbar
+    """
+    def __init__(self):
+        
+        super(PyCmBoxTerminal, self).__init__()
+
+        self.term = PyCmTerminal()
+        self.add_terminal()
+        self.add_scrollbar()
+
+    def add_terminal(self):
+        self.pack_start(self.term, True, True, 0)
+
+    def add_scrollbar(self):
+        adj = self.term.get_vadjustment()
+        self.scroll = Gtk.VScrollbar(adj)
+        self.scroll.set_no_show_all(True)
+        self.pack_start(self.scroll, False, False, 0)
+
+
+
 class PyCm(object):
     """Main class for application
     """
@@ -312,7 +333,7 @@ class PyCm(object):
 
         super(PyCm, self).__init__()
 
-        self.term = PyCmTerminal()
+        #self.term = PyCmTerminal()
         self.client = GConf.Client.get_default()
 
         builder = Gtk.Builder()  
@@ -325,8 +346,9 @@ class PyCm(object):
         self.img = GdkPixbuf.Pixbuf.new_from_file(self.ipath)
         w.set_icon(self.img)
 
-        self.entry_user = builder.get_object('entry_user')
+        #self.entry_user = builder.get_object('entry_user')
 
+        self.hbox = PyCmBoxTerminal()
         self.notebook = builder.get_object('notebook')
 
 
@@ -344,22 +366,22 @@ class PyCm(object):
         #self.term.fork_command_full(Vte.PtyFlags.DEFAULT, os.environ['HOME'], ["/bin/bash"], 
         #                           [], GLib.SpawnFlags.DO_NOT_REAP_CHILD, None, None)
 
-        self.term.connect("child-exited", Gtk.main_quit)
+        self.hbox.term.connect("child-exited", Gtk.main_quit)
 
         self.tab_label = Gtk.Label(USERNAME + "@" + HOSTNAME)
 
-        
-        self.notebook.append_page(self.term, self.tab_label)
+        self.notebook.append_page(self.hbox, self.tab_label)
+
         self.current_tab = self.notebook.get_current_page()
 
         self.notebook.next_page()
 
-        GConfHandler(self.term)
+        GConfHandler(self.hbox.term)
 
         w.show_all()
-        self.term.grab_focus()
+        self.hbox.term.grab_focus()
         self.load_config()
-        term_list.append(self.term)
+        term_list.append(self.hbox.term)
 
 
     def load_config(self):
@@ -370,27 +392,32 @@ class PyCm(object):
             self.shellvalue = self.client.get_string(KEY('/general/default_shell'))
             if self.shellvalue == "":
                 self.shellvalue = "/bin/bash"
-            self.term.fork_command_full(Vte.PtyFlags.DEFAULT, os.environ['HOME'], [self.shellvalue], 
+            self.hbox.term.fork_command_full(Vte.PtyFlags.DEFAULT, os.environ['HOME'], [self.shellvalue], 
                     [], GLib.SpawnFlags.DO_NOT_REAP_CHILD, None, None)
         except:
             print "Could not load shell type! Big problem!"
 
         try:
             self.bgcolor = Gdk.color_parse(self.client.get_string(KEY('/style/background/color')))
-            self.term.set_color_background(self.bgcolor)
-            self.term.set_background_tint_color(self.bgcolor)
+            self.hbox.term.set_color_background(self.bgcolor)
+            self.hbox.term.set_background_tint_color(self.bgcolor)
             self.fgcolor = Gdk.color_parse(self.client.get_string(KEY('/style/font/color')))
-            self.term.set_color_foreground(self.fgcolor)
+            self.hbox.term.set_color_foreground(self.fgcolor)
             self.font = Pango.FontDescription(self.client.get_string(KEY('/style/font/style')))
-            self.term.set_font(self.font)
+            self.hbox.term.set_font(self.font)
             #self.opacity = self.client.get_int(KEY('/style/background/transparency'))
-            #self.term.set_opacity(self.opacity)
+            #self.hbox.term.set_opacity(self.opacity)
             self.lines = self.client.get_int(KEY('/general/scrollback'))
-            self.term.set_scrollback_lines(self.lines)
+            self.hbox.term.set_scrollback_lines(self.lines)
             self.command = self.client.get_string(KEY('/general/command'))
             if self.command != "":
                 self.length_command = len(self.command) + 1
-                self.term.feed_child(self.command + "\n", self.length_command)
+                self.hbox.term.feed_child(self.command + "\n", self.length_command)
+            self.scrollbar = self.client.get_bool(KEY('/general/vbar'))
+            if self.scrollbar:
+                self.hbox.scroll.show()
+            else:
+                self.hbox.scroll.hide()
             
         except:
             print "I can't load user preference. I will load a basic standard terminal."
@@ -409,28 +436,30 @@ class PyCm(object):
     def add_tab(self, widget):
         """New terminal when user click on button New
         """
-        self.term = PyCmTerminal()
+        self.hbox = PyCmBoxTerminal()
 
-        self.term.connect("child-exited", self.remove_tab)
+        self.hbox.term.connect("child-exited", self.remove_tab)
 
         self.tab_label = Gtk.Label(USERNAME + "@" + HOSTNAME)
 
-        self.notebook.append_page(self.term, self.tab_label)
+        self.notebook.append_page(self.hbox, self.tab_label)
         self.current_tab = self.notebook.get_current_page()
 
-        self.term.show()
-
-        self.load_config()
+        self.hbox.term.show()
+        self.hbox.show()        
 
         self.notebook.next_page()
 
-        self.term.grab_focus()
+        self.hbox.term.grab_focus()
 
-        term_list.append(self.term)
+        self.load_config()
+
+        term_list.append(self.hbox.term)
 
     def remove_tab(self, widget):
 
         self.current_tab = self.notebook.get_current_page()
+        term_list.pop(self.current_tab)
         self.notebook.remove_page(self.current_tab)
 
     def main(self):

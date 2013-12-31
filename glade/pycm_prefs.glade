@@ -15,14 +15,10 @@
     <property name="page_increment">1</property>
   </object>
   <object class="GtkWindow" id="window-prefs">
-    <property name="width_request">440</property>
-    <property name="height_request">520</property>
     <property name="can_focus">False</property>
     <property name="border_width">10</property>
     <property name="title" translatable="yes">pyConnection Manager Preference</property>
     <property name="resizable">False</property>
-    <property name="default_width">440</property>
-    <property name="default_height">520</property>
     <child>
       <object class="GtkBox" id="box1">
         <property name="visible">True</property>
@@ -396,8 +392,8 @@
                     </child>
                     <child>
                       <object class="GtkLabel" id="label15">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="no_show_all">True</property>
                         <property name="halign">start</property>
                         <property name="label" translatable="yes">Show scrollbar</property>
                       </object>
@@ -419,19 +415,6 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">0</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSwitch" id="switch-vbar">
-                        <property name="can_focus">False</property>
-                        <property name="no_show_all">True</property>
-                        <signal name="activate" handler="on_switch-vbar_activate" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">3</property>
                         <property name="width">1</property>
                         <property name="height">1</property>
                       </packing>
@@ -489,6 +472,23 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">2</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="switch-vbar">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="use_stock">True</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_switch-vbar_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">3</property>
                         <property name="width">1</property>
                         <property name="height">1</property>
                       </packing>
