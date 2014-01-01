@@ -90,59 +90,68 @@ class PyCmPrefs(Gtk.Window):
         self.w_prefs.set_icon(self.img)
 
 
-        # Get all object for prefs window and load widget value from gconf.
+        # Get all object for prefs window.
 
-            # Object from pycm tab
         self.filechooserbutton = self.builder_prefs.get_object('filechooserbutton')
         #self.entry_user = self.builder_prefs.get_object('entry-user')
-
-
-            # Object from style and apparence tab
         self.bg_colorbutton = self.builder_prefs.get_object('bg-colorbutton')
-        self.bg_colorbutton_color = Gdk.color_parse(self.client.get_string(KEY('/style/background/color')))
-        self.bg_colorbutton.set_color(self.bg_colorbutton_color)
-
         self.fg_colorbutton = self.builder_prefs.get_object('fg-colorbutton')
-        self.fg_colorbutton_color = Gdk.color_parse(self.client.get_string(KEY('/style/font/color')))
-        self.fg_colorbutton.set_color(self.fg_colorbutton_color)
-        
         self.font_button = self.builder_prefs.get_object('font-button')
-        self.font_button_font = self.client.get_string(KEY('/style/font/style'))
-        self.font_button.set_font_name(self.font_button_font)
-        
         self.hscale_opacity = self.builder_prefs.get_object('hscale-opacity')
-        self.opacity_value = self.client.get_int(KEY('/style/background/transparency'))
-        self.hscale_opacity.set_value(self.opacity_value)
-
-
-            # Object from terminal tab
         self.shellcombo = self.builder_prefs.get_object('shell_combo')
-        self.load_shells_combo()
-        self.shellvalue_id = self.client.get_int(KEY('/general/default_shell_id'))
-        self.shellcombo.set_active(self.shellvalue_id)
-
         self.spin_scrollback = self.builder_prefs.get_object('spin-scrollback')
-        self.scrollback_lines = self.client.get_int(KEY('/general/scrollback'))
-        self.spin_scrollback.set_value(self.scrollback_lines)
-        
         self.switch_vbar = self.builder_prefs.get_object('switch-vbar')
-        self.vbar_bool = self.client.get_bool(KEY('/general/vbar'))
-        self.switch_vbar.set_active(self.vbar_bool)
-        
         self.entry_command = self.builder_prefs.get_object('entry-command')
-        self.command = self.client.get_string(KEY('/general/command'))
-        if self.command is not None:
-            self.entry_command.set_text(self.command)
-        
         self.switch_fullscreen = self.builder_prefs.get_object('switch-fullscreen')
-        self.fullscreen_bool = self.client.get_bool(KEY('/general/fullscreen'))
-        self.switch_fullscreen.set_active(self.fullscreen_bool)
-
-        
         self.button_save = self.builder_prefs.get_object('button-save')
 
 
+        home = os.getenv('HOME')
+        conf = '.gconf/apps/pycm'
+        gconf_dir = os.path.join(home, conf)
+        
+        if os.path.exists(gconf_dir):
 
+                # Object from style and apparence tab
+            
+            self.bg_colorbutton_color = Gdk.color_parse(self.client.get_string(KEY('/style/background/color')))
+            self.bg_colorbutton.set_color(self.bg_colorbutton_color)
+
+            self.fg_colorbutton_color = Gdk.color_parse(self.client.get_string(KEY('/style/font/color')))
+            self.fg_colorbutton.set_color(self.fg_colorbutton_color)
+            
+            self.font_button_font = self.client.get_string(KEY('/style/font/style'))
+            self.font_button.set_font_name(self.font_button_font)
+            
+            self.opacity_value = self.client.get_int(KEY('/style/background/transparency'))
+            self.hscale_opacity.set_value(self.opacity_value)
+
+
+                # Object from terminal tab
+            
+            self.load_shells_combo()
+            self.shellvalue_id = self.client.get_int(KEY('/general/default_shell_id'))
+            self.shellcombo.set_active(self.shellvalue_id)
+
+            self.scrollback_lines = self.client.get_int(KEY('/general/scrollback'))
+            self.spin_scrollback.set_value(self.scrollback_lines)
+            
+            self.vbar_bool = self.client.get_bool(KEY('/general/vbar'))
+            self.switch_vbar.set_active(self.vbar_bool)
+            
+            self.command = self.client.get_string(KEY('/general/command'))
+            if self.command is not None:
+                self.entry_command.set_text(self.command)
+            
+            self.fullscreen_bool = self.client.get_bool(KEY('/general/fullscreen'))
+            self.switch_fullscreen.set_active(self.fullscreen_bool)
+
+        else:
+
+            pass
+
+        
+        
         signals = {
             "on_window-prefs_destroy" : self.delete,
             "on_button-save_clicked" : self.delete,
@@ -414,9 +423,11 @@ class PyCm(object):
         """Function that load configuration for Vte at startup
         """
         # Colors need to after window show!!
+        
+        
         try:
             self.shellvalue = self.client.get_string(KEY('/general/default_shell'))
-            if self.shellvalue == "":
+            if not self.shellvalue or self.shellvalue == "":
                 self.shellvalue = "/bin/bash"
             self.hbox.term.fork_command_full(Vte.PtyFlags.DEFAULT, os.environ['HOME'], [self.shellvalue], 
                     [], GLib.SpawnFlags.DO_NOT_REAP_CHILD, None, None)
