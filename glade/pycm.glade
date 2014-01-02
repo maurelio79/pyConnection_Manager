@@ -12,6 +12,7 @@
       <column type="gchar"/>
     </columns>
   </object>
+  <object class="GtkTreeStore" id="treestore1"/>
   <object class="GtkWindow" id="window-root">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -37,6 +38,16 @@
                   <object class="GtkMenu" id="menu1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="open">
+                        <property name="label">gtk-open</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_open_activate" swapped="no"/>
+                      </object>
+                    </child>
                     <child>
                       <object class="GtkImageMenuItem" id="quit">
                         <property name="label">gtk-quit</property>
@@ -232,6 +243,7 @@
           <object class="GtkHPaned" id="hpaned">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="margin_top">5</property>
             <child>
               <object class="GtkNotebook" id="notebook">
                 <property name="visible">True</property>
@@ -258,8 +270,8 @@
                 </child>
               </object>
               <packing>
-                <property name="resize">False</property>
-                <property name="shrink">True</property>
+                <property name="resize">True</property>
+                <property name="shrink">False</property>
               </packing>
             </child>
             <child>

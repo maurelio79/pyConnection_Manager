@@ -1,13 +1,15 @@
 { 
     "dir1" : {
         
-        "dpl101" : { 
-            "server_name" : "dpl101",
-            "full_name" : "dpl101.dapersico"
+        "raspmotion" : { 
+            "display_name" : "raspmotion",
+            "ip_address" : "192.168.1.10",
+            "full_name" : "192.168.1.10"
         },
 
         "dpl102" : { 
-            "server_name" : "dpl102",
+            "display_name" : "dpl102",
+            "ip_address" : "192.168.1.2",
             "full_name" : "dpl102.dapersico"
         }
 
@@ -16,12 +18,14 @@
     "dir2" : {
         
         "dpl103" : { 
-            "server_name" : "dpl103",
+            "display_name" : "dpl103",
+            "ip_address" : "192.168.1.2",
             "full_name" : "dpl103.dapersico"
         },
 
         "dpl104" : { 
-            "server_name" : "dpl104",
+            "display_name" : "dpl104",
+            "ip_address" : "192.168.1.2",
             "full_name" : "dpl104.dapersico"
         }
 

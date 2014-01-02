@@ -307,6 +307,11 @@ class GConfHandler(object):
                 scrollbar.show()
             else:
                 scrollbar.hide()
+
+      
+
+    
+
         
 
 
@@ -376,6 +381,7 @@ class PyCm(object):
         #self.entry_user = builder.get_object('entry_user')
 
         self.hbox = PyCmBoxTerminal()
+        self.hpaned = builder.get_object('hpaned')
         self.notebook = builder.get_object('notebook')
 
 
@@ -385,6 +391,7 @@ class PyCm(object):
             "on_preference_activate" : self.show_prefs,
             "on_new-tab_clicked" : self.add_tab,
             "on_about_activate" : self.show_about,
+            "on_open_activate" : self.show_open_file,
         }
 
         builder.connect_signals(signals)
@@ -468,6 +475,23 @@ class PyCm(object):
         """
         PyCmAbout()
 
+    def show_open_file(self, widget):
+        """Load open file dialog
+        """
+        self.builder_open = Gtk.Builder()  
+        self.builder_open.add_from_file(gladefile('pycm_open.glade'))
+
+        self.w_open = self.builder_open.get_object('filechooser-dialog')
+
+        signals = {
+            "on_button-cancel_clicked" : self.delete_open,
+            "on_button-ok_clicked" : self.open_file,
+        }
+
+        self.builder_open.connect_signals(signals)
+
+        self.w_open.show_all()
+
 
     def add_tab(self, widget):
         """New terminal when user click on button New
@@ -491,6 +515,109 @@ class PyCm(object):
         self.load_config()
 
         term_list.append(self.hbox.term)
+
+
+    def open_file(self, widget):
+        self.serverfile = self.w_open.get_filename()
+
+        if self.serverfile is not None:
+            print self.serverfile
+            self.delete_open()
+            self.treestore = Gtk.TreeStore(str)
+
+            with open(self.serverfile) as data_file:
+                self.data = json.load(data_file)
+
+            for i in self.data:
+                self.piter = self.treestore.append(None, [i])
+                for j in self.data[i]:
+                    self.treestore.append(self.piter, [j])
+            
+            # create the TreeView using treestore
+            self.treeview = Gtk.TreeView(self.treestore)
+
+            # create the TreeViewColumn to display the data
+            self.tvcolumn = Gtk.TreeViewColumn('Server List')
+
+            # add tvcolumn to treeview
+            self.treeview.append_column(self.tvcolumn)
+
+            # create a CellRendererText to render the data
+            self.cell = Gtk.CellRendererText()
+            #self.cell.set_property('editable', True)
+            
+            # add the cell to the tvcolumn and allow it to expand
+            self.tvcolumn.pack_start(self.cell, True)
+
+            # set the cell "text" attribute to column 0 - retrieve text
+            # from that column in treestore
+            self.tvcolumn.add_attribute(self.cell, 'text', 0)
+
+            # make it searchable
+            self.treeview.set_search_column(0)
+
+            # Allow sorting on the column
+            self.tvcolumn.set_sort_column_id(0)
+
+            # Allow drag and drop reordering of rows
+            self.treeview.set_reorderable(True)
+
+            self.hpaned.add2(self.treeview)
+            self.treeview.show()
+
+            # Signal for tree view goes here
+            self.treeview.connect("row-activated", self.dynamic_connection)
+
+    def delete_open(self):
+        self.w_open.destroy()
+
+    def dynamic_connection(self, widget, item, obj):
+        self.treeselection = self.treeview.get_selection()
+        #print self.treeselection
+
+        (self.model, self.pathlist) = self.treeselection.get_selected_rows()
+        #print self.model, self.pathlist
+        for path in self.pathlist :
+            self.tree_iter = self.model.get_iter(path)
+            self.host = self.model.get_value(self.tree_iter,0)
+            self.parent = self.model.iter_parent(self.tree_iter)
+            self.parent_value = self.model.get_value(self.parent, 0)
+            #print self_parent_value
+        #full_name = self.data['dir1'][self.host]
+        #print full_name
+        #print self.data[self.parent_value][self.host]
+        self.add_remote_tab(self.data, self.parent_value, self.host)
+
+    def add_remote_tab(self, data, parent, host):
+        """New terminal when user click on button New
+        """
+        self.data = data
+        self.parent = parent
+        self.host = host
+
+        self.hbox = PyCmBoxTerminal()
+
+        self.hbox.term.connect("child-exited", self.remove_tab)
+
+        self.tab_label = Gtk.Label(USERNAME + "@" + HOSTNAME)
+
+        self.notebook.append_page(self.hbox, self.tab_label)
+        self.current_tab = self.notebook.get_current_page()
+
+        self.hbox.term.show()
+        self.hbox.show()        
+
+        self.notebook.next_page()
+
+        self.hbox.term.grab_focus()
+
+        self.load_config()
+        self.command = 'ssh ' + USERNAME + '@' + self.data[self.parent][self.host]
+        self.length_command = len(self.command) + 1
+        self.hbox.term.feed_child(self.command + "\n", self.length_command)
+
+        term_list.append(self.hbox.term)
+
 
     def remove_tab(self, widget):
 
