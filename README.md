@@ -8,8 +8,6 @@ This will be a tabbed terminal to manage different connection to linux servers, 
 I say "will be" because at the moment it's still not :-)
 Anyway it's already an esay to use terminal emulator!
 
-<b>BUG!!</b>
-<a href="https://github.com/maurelio79/pyConnection_Manager/issues/3">Preference bug</a>
 
 To test it download the zip and run
 <pre>python setup.py</pre>
