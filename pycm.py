@@ -67,6 +67,8 @@ class PyCmAbout(Gtk.AboutDialog):
         self.w_about.destroy()
 
 
+
+
 class PyCmPrefs(Gtk.Window):
     """This class manage user preferences stored in gconf file.
         The class load preference into the preference gui when the user call it;
@@ -89,11 +91,12 @@ class PyCmPrefs(Gtk.Window):
         self.img = GdkPixbuf.Pixbuf.new_from_file(self.ipath)
         self.w_prefs.set_icon(self.img)
 
+        
 
         # Get all object for prefs window.
 
         self.filechooserbutton = self.builder_prefs.get_object('filechooserbutton')
-        #self.entry_user = self.builder_prefs.get_object('entry-user')
+        self.entry_user = self.builder_prefs.get_object('entry-user')
         self.bg_colorbutton = self.builder_prefs.get_object('bg-colorbutton')
         self.fg_colorbutton = self.builder_prefs.get_object('fg-colorbutton')
         self.font_button = self.builder_prefs.get_object('font-button')
@@ -104,7 +107,7 @@ class PyCmPrefs(Gtk.Window):
         self.entry_command = self.builder_prefs.get_object('entry-command')
         self.switch_fullscreen = self.builder_prefs.get_object('switch-fullscreen')
         self.button_save = self.builder_prefs.get_object('button-save')
-
+        
 
         home = os.getenv('HOME')
         conf = '.gconf/apps/pycm'
@@ -112,42 +115,55 @@ class PyCmPrefs(Gtk.Window):
         
         if os.path.exists(gconf_dir):
 
+                # Object from window tab
+
+            self.entry_user_text = self.client.get_string(KEY('/general/default_user'))
+            if self.entry_user_text != None:
+                self.entry_user.set_text(self.entry_user_text)
+
                 # Object from style and apparence tab
             
             self.bg_colorbutton_color = Gdk.color_parse(self.client.get_string(KEY('/style/background/color')))
-            self.bg_colorbutton.set_color(self.bg_colorbutton_color)
+            if self.bg_colorbutton_color != None:
+                self.bg_colorbutton.set_color(self.bg_colorbutton_color)
 
             self.fg_colorbutton_color = Gdk.color_parse(self.client.get_string(KEY('/style/font/color')))
-            self.fg_colorbutton.set_color(self.fg_colorbutton_color)
+            if self.fg_colorbutton_color != None:
+                self.fg_colorbutton.set_color(self.fg_colorbutton_color)
             
             self.font_button_font = self.client.get_string(KEY('/style/font/style'))
-            self.font_button.set_font_name(self.font_button_font)
+            if font_button_font != None:
+                self.font_button.set_font_name(self.font_button_font)
             
             self.opacity_value = self.client.get_int(KEY('/style/background/transparency'))
-            self.hscale_opacity.set_value(self.opacity_value)
+            if self.opacity_value != None:
+                self.hscale_opacity.set_value(self.opacity_value)
 
 
                 # Object from terminal tab
             
             self.load_shells_combo()
             self.shellvalue_id = self.client.get_int(KEY('/general/default_shell_id'))
-            self.shellcombo.set_active(self.shellvalue_id)
+            if self.shellvalue_id != None:
+                self.shellcombo.set_active(self.shellvalue_id)
 
             self.scrollback_lines = self.client.get_int(KEY('/general/scrollback'))
-            self.spin_scrollback.set_value(self.scrollback_lines)
+            if self.scrollback_lines != None:
+                self.spin_scrollback.set_value(self.scrollback_lines)
             
             self.vbar_bool = self.client.get_bool(KEY('/general/vbar'))
-            self.switch_vbar.set_active(self.vbar_bool)
+            if self.vbar_bool != None:
+                self.switch_vbar.set_active(self.vbar_bool)
             
             self.command = self.client.get_string(KEY('/general/command'))
             if self.command is not None:
                 self.entry_command.set_text(self.command)
             
             self.fullscreen_bool = self.client.get_bool(KEY('/general/fullscreen'))
-            self.switch_fullscreen.set_active(self.fullscreen_bool)
+            if self.fullscreen_bool != None:
+                self.switch_fullscreen.set_active(self.fullscreen_bool)
 
         else:
-
             pass
 
         
@@ -164,6 +180,7 @@ class PyCmPrefs(Gtk.Window):
             "on_switch-vbar_toggled" : self.set_vbar,
             "on_switch-fullscreen_toggled" : self.set_fullscreen,
             "on_button-command_clicked" : self.set_command,
+            "on_button-user_clicked" : self.set_user,
         }
 
         self.builder_prefs.connect_signals(signals)
@@ -236,6 +253,10 @@ class PyCmPrefs(Gtk.Window):
         self.command = self.entry_command.get_text()
         self.client.set_string(KEY('/general/command'), self.command)
 
+    def set_user(self, widget):
+        self.default_user = self.entry_user.get_text()
+        self.client.set_string(KEY('/general/default_user'), self.default_user)
+
 
 
 
@@ -307,11 +328,6 @@ class GConfHandler(object):
                 scrollbar.show()
             else:
                 scrollbar.hide()
-
-      
-
-    
-
         
 
 
@@ -378,7 +394,6 @@ class PyCm(object):
         self.img = GdkPixbuf.Pixbuf.new_from_file(self.ipath)
         w.set_icon(self.img)
 
-        #self.entry_user = builder.get_object('entry_user')
 
         self.hbox = PyCmBoxTerminal()
         self.hpaned = builder.get_object('hpaned')
@@ -418,6 +433,7 @@ class PyCm(object):
 
         self.opacity = self.client.get_int(KEY('/style/background/transparency'))
         w.set_opacity((100 - self.opacity) / 100.0)
+
 
         w.show_all()
         self.hbox.term.grab_focus()
@@ -466,26 +482,27 @@ class PyCm(object):
             print "I can't load user preference. I will load a basic standard terminal."
 
     def show_prefs(self, widget):
-        """Load preference window
+        """Show preference window
         """
         PyCmPrefs()
 
     def show_about(self, widget):
-        """Load about dialog
+        """Show about dialog
         """
         PyCmAbout()
 
     def show_open_file(self, widget):
-        """Load open file dialog
+        """Show open file dialog
         """
         self.builder_open = Gtk.Builder()  
         self.builder_open.add_from_file(gladefile('pycm_open.glade'))
 
         self.w_open = self.builder_open.get_object('filechooser-dialog')
+        
 
         signals = {
             "on_button-cancel_clicked" : self.delete_open,
-            "on_button-ok_clicked" : self.open_file,
+            "on_button-ok_clicked" : self.load_file,
         }
 
         self.builder_open.connect_signals(signals)
@@ -493,35 +510,13 @@ class PyCm(object):
         self.w_open.show_all()
 
 
-    def add_tab(self, widget):
-        """New terminal when user click on button New
+
+    def load_file(self, widget):
+        """Load file in the TreeView
         """
-        self.hbox = PyCmBoxTerminal()
-
-        self.hbox.term.connect("child-exited", self.remove_tab)
-
-        self.tab_label = Gtk.Label(USERNAME + "@" + HOSTNAME)
-
-        self.notebook.append_page(self.hbox, self.tab_label)
-        self.current_tab = self.notebook.get_current_page()
-
-        self.hbox.term.show()
-        self.hbox.show()        
-
-        self.notebook.next_page()
-
-        self.hbox.term.grab_focus()
-
-        self.load_config()
-
-        term_list.append(self.hbox.term)
-
-
-    def open_file(self, widget):
         self.serverfile = self.w_open.get_filename()
 
-        if self.serverfile is not None:
-            print self.serverfile
+        if self.serverfile is not "None":
             self.delete_open()
             self.treestore = Gtk.TreeStore(str)
 
@@ -566,35 +561,17 @@ class PyCm(object):
             self.treeview.show()
 
             # Signal for tree view goes here
-            self.treeview.connect("row-activated", self.dynamic_connection)
+            self.treeview.connect("row-activated", self.add_remote_tab)
 
-    def delete_open(self):
+    def delete_open(self, widget):
+        """Delete open file dialog
+        """
         self.w_open.destroy()
 
-    def dynamic_connection(self, widget, item, obj):
-        self.treeselection = self.treeview.get_selection()
-        #print self.treeselection
 
-        (self.model, self.pathlist) = self.treeselection.get_selected_rows()
-        #print self.model, self.pathlist
-        for path in self.pathlist :
-            self.tree_iter = self.model.get_iter(path)
-            self.host = self.model.get_value(self.tree_iter,0)
-            self.parent = self.model.iter_parent(self.tree_iter)
-            self.parent_value = self.model.get_value(self.parent, 0)
-            #print self_parent_value
-        #full_name = self.data['dir1'][self.host]
-        #print full_name
-        #print self.data[self.parent_value][self.host]
-        self.add_remote_tab(self.data, self.parent_value, self.host)
-
-    def add_remote_tab(self, data, parent, host):
+    def add_tab(self, widget):
         """New terminal when user click on button New
         """
-        self.data = data
-        self.parent = parent
-        self.host = host
-
         self.hbox = PyCmBoxTerminal()
 
         self.hbox.term.connect("child-exited", self.remove_tab)
@@ -612,7 +589,47 @@ class PyCm(object):
         self.hbox.term.grab_focus()
 
         self.load_config()
-        self.command = 'ssh ' + USERNAME + '@' + self.data[self.parent][self.host]
+
+        term_list.append(self.hbox.term)
+
+
+    def add_remote_tab(self, widget, item, obj):
+        """New terminal when user click on a server name in the
+            treeview
+        """
+        self.treeselection = self.treeview.get_selection()
+        (self.model, self.pathlist) = self.treeselection.get_selected_rows()
+
+        for path in self.pathlist :
+            self.tree_iter = self.model.get_iter(path)
+            self.host = self.model.get_value(self.tree_iter,0)
+            self.parent = self.model.iter_parent(self.tree_iter)
+            self.parent_value = self.model.get_value(self.parent, 0)
+
+        self.hbox = PyCmBoxTerminal()
+
+        self.hbox.term.connect("child-exited", self.remove_tab)
+
+        self.default_user = self.client.get_string(KEY('/general/default_user'))
+
+        if self.default_user != None:
+            self.user = self.default_user
+        else:
+            self.user = USERNAME        
+
+        self.tab_label = Gtk.Label(self.user + "@" + self.host)
+
+        self.notebook.append_page(self.hbox, self.tab_label)
+        self.current_tab = self.notebook.get_current_page()
+
+        self.hbox.term.show()
+        self.hbox.show()        
+        self.notebook.next_page()
+        self.hbox.term.grab_focus()
+
+        self.load_config()
+
+        self.command = 'ssh ' + self.user + "@" + self.data[self.parent_value][self.host]
         self.length_command = len(self.command) + 1
         self.hbox.term.feed_child(self.command + "\n", self.length_command)
 
