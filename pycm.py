@@ -335,9 +335,9 @@ class PycmNew(Gtk.Window):
         self.db_name_full = DB_PATH + "/pycm.db"
         if not os.path.exists(DB_PATH):
             os.system("mkdir " + DB_PATH)
-
+        print DB_PATH
         try:
-            db = sqlite3.connect('pycm.db')
+            db = sqlite3.connect(self.db_name_full)
 
             query = """CREATE TABLE `%s` (
                `id` integer primary key autoincrement,
@@ -345,7 +345,7 @@ class PycmNew(Gtk.Window):
                `display_name` char(255),
                `ip_address` char(255) not null,
                `user`  char(255) not null
-            );""" % (self.db_name_full)
+            );""" % (self.db_name)
 
             db.execute(query)
             db.commit()
