@@ -330,7 +330,7 @@ class PycmNew(Gtk.Window):
         
         self.db_name = self.entry_db.get_text()
 
-        DB_PATH = '/home/maurelio/.pycm'
+        DB_PATH = '/home/'+ USERNAME + '/.pycm'
 
         self.db_name_full = DB_PATH + "/pycm.db"
         if not os.path.exists(DB_PATH):
