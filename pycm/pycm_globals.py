@@ -4,7 +4,7 @@ import os, getpass
 
 
 __all__ = [
-    'NAME', 'VERSION', 'IMAGE_DIR', 'GLADE_DIR', 'LOCALE_DIR', 'GCONF_PATH', 'KEY',
+    'NAME', 'VERSION', 'IMAGE_DIR', 'GLADE_DIR', 'LOCALE_DIR', 'GCONF_PATH', 'KEY', 'DB_PATH',
     'HOSTNAME', 'USERNAME', 'TERMINAL_MATCH_EXPRS', 'TERMINAL_MATCH_TAGS', 'FULL_NAME',
     'SHELLS_FILE', 'USER_SHELL_VALUE', 'ALIGN_CENTER', 'ALIGN_RIGHT', 'ALIGN_LEFT',
     ]
@@ -22,6 +22,9 @@ USERNAME = getpass.getuser()
 # Gconf stuff. Yep, it is hardcoded =)
 GCONF_PATH = '/apps/pycm'
 KEY = lambda x: (GCONF_PATH+x)
+
+# DB server stuff
+DB_PATH = '/home/' + USERNAME + '/.' + NAME
 
 # Default user shell
 #USER_SHELL_VALUE = _('<user shell>')

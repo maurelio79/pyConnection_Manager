@@ -2,7 +2,7 @@
 # -*- coding: utf-8; -*-
 
 from gi.repository import Gtk, Gdk, Vte, GLib, Pango, GConf, GdkPixbuf
-import json, os, getpass
+import json, os, getpass, sqlite3
 import sys
 sys.path.append('/usr/lib/python2.7/dist-packages/pycm/')
 from pycm_globals import *
@@ -27,6 +27,41 @@ def hexify_color(c):
 
 
 term_list = []
+
+
+class PyCmError(Gtk.Dialog):
+    """The About pyConnection Manager dialog class
+    """
+    def __init__(self, error):
+
+        super(PyCmError, self).__init__()
+
+        self.error = error
+
+        self.builder_error = Gtk.Builder()  
+        self.builder_error.add_from_file(gladefile('pycm_error.glade'))
+
+        self.w_error = self.builder_error.get_object('window-error')
+        self.label_error = self.builder_error.get_object('label-error')
+        self.button_error = self.builder_error.get_object('button-error')
+
+        signals = {
+            "on_button-error_clicked" : lambda _: self.destroy(),
+        }
+
+        self.builder_error.connect_signals(signals)
+
+        self.w_error.connect('destroy', lambda _: self.destroy())
+
+        # images
+        self.ipath = pixmapfile('utilities-terminal.png')
+        self.img = GdkPixbuf.Pixbuf.new_from_file(self.ipath)
+        self.w_error.set_icon(self.img)
+
+        self.label_error.set_text(self.error)
+
+        self.w_error.show_all()
+
 
 
 
@@ -93,7 +128,7 @@ class PyCmPrefs(Gtk.Window):
 
         
 
-        # Get all object for prefs window.
+        # Get all object for prefs window.        
 
         self.filechooserbutton = self.builder_prefs.get_object('filechooserbutton')
         self.entry_user = self.builder_prefs.get_object('entry-user')
@@ -132,7 +167,7 @@ class PyCmPrefs(Gtk.Window):
                 self.fg_colorbutton.set_color(self.fg_colorbutton_color)
             
             self.font_button_font = self.client.get_string(KEY('/style/font/style'))
-            if font_button_font != None:
+            if self.font_button_font != None:
                 self.font_button.set_font_name(self.font_button_font)
             
             self.opacity_value = self.client.get_int(KEY('/style/background/transparency'))
@@ -258,6 +293,66 @@ class PyCmPrefs(Gtk.Window):
         self.client.set_string(KEY('/general/default_user'), self.default_user)
 
 
+
+
+class PycmNew(Gtk.Window):
+    """docstring for PycmNew"""
+
+    def __init__(self):
+        super(PycmNew, self).__init__()
+
+        self.builder_new = Gtk.Builder() 
+        self.builder_new.add_from_file(gladefile('pycm_new.glade'))
+
+        self.w_new = self.builder_new.get_object('window-new')
+
+        self.button_db = self.builder_new.get_object('button-db')
+        self.entry_db = self.builder_new.get_object('entry-db')
+
+        signals = {
+            "on_button-db_clicked" : self.save_db,
+
+
+        }
+
+        self.w_new.connect('destroy', lambda _: self.destroy())
+
+        self.builder_new.connect_signals(signals)
+
+        # images
+        self.ipath = pixmapfile('utilities-terminal.png')
+        self.img = GdkPixbuf.Pixbuf.new_from_file(self.ipath)
+        self.w_new.set_icon(self.img)
+
+        self.w_new.show_all()
+
+    def save_db(self, widget):
+        
+        self.db_name = self.entry_db.get_text()
+
+        DB_PATH = '/home/maurelio/.pycm'
+
+        self.db_name_full = DB_PATH + "/pycm.db"
+        if not os.path.exists(DB_PATH):
+            os.system("mkdir " + DB_PATH)
+
+        try:
+            db = sqlite3.connect('pycm.db')
+
+            query = """CREATE TABLE `%s` (
+               `id` integer primary key autoincrement,
+               `full_name` char(255) not null,
+               `display_name` char(255),
+               `ip_address` char(255) not null,
+               `user`  char(255) not null
+            );""" % (self.db_name_full)
+
+            db.execute(query)
+            db.commit()
+            db.close()
+        except sqlite3.OperationalError as e:
+            PyCmError(str(e))
+        
 
 
 class GConfHandler(object):
@@ -407,6 +502,7 @@ class PyCm(object):
             "on_new-tab_clicked" : self.add_tab,
             "on_about_activate" : self.show_about,
             "on_open_activate" : self.show_open_file,
+            "on_new_activate" : self.show_new_file,
         }
 
         builder.connect_signals(signals)
@@ -433,7 +529,6 @@ class PyCm(object):
 
         self.opacity = self.client.get_int(KEY('/style/background/transparency'))
         w.set_opacity((100 - self.opacity) / 100.0)
-
 
         w.show_all()
         self.hbox.term.grab_focus()
@@ -509,59 +604,60 @@ class PyCm(object):
 
         self.w_open.show_all()
 
+    def show_new_file(self, widget):
+        PycmNew()
 
+    # def load_file(self, widget):
+    #     """Load file in the TreeView
+    #     """
+    #     self.serverfile = self.w_open.get_filename()
 
-    def load_file(self, widget):
-        """Load file in the TreeView
-        """
-        self.serverfile = self.w_open.get_filename()
+    #     if self.serverfile is not "None":
+    #         self.delete_open(self)
+    #         self.treestore = Gtk.TreeStore(str)
 
-        if self.serverfile is not "None":
-            self.delete_open()
-            self.treestore = Gtk.TreeStore(str)
+    #         with open(self.serverfile) as data_file:
+    #             self.data = json.load(data_file)
 
-            with open(self.serverfile) as data_file:
-                self.data = json.load(data_file)
-
-            for i in self.data:
-                self.piter = self.treestore.append(None, [i])
-                for j in self.data[i]:
-                    self.treestore.append(self.piter, [j])
+    #         for i in self.data:
+    #             self.piter = self.treestore.append(None, [i])
+    #             for j in self.data[i]:
+    #                 self.treestore.append(self.piter, [j])
             
-            # create the TreeView using treestore
-            self.treeview = Gtk.TreeView(self.treestore)
+    #         # create the TreeView using treestore
+    #         self.treeview = Gtk.TreeView(self.treestore)
 
-            # create the TreeViewColumn to display the data
-            self.tvcolumn = Gtk.TreeViewColumn('Server List')
+    #         # create the TreeViewColumn to display the data
+    #         self.tvcolumn = Gtk.TreeViewColumn('Server List')
 
-            # add tvcolumn to treeview
-            self.treeview.append_column(self.tvcolumn)
+    #         # add tvcolumn to treeview
+    #         self.treeview.append_column(self.tvcolumn)
 
-            # create a CellRendererText to render the data
-            self.cell = Gtk.CellRendererText()
-            #self.cell.set_property('editable', True)
+    #         # create a CellRendererText to render the data
+    #         self.cell = Gtk.CellRendererText()
+    #         #self.cell.set_property('editable', True)
             
-            # add the cell to the tvcolumn and allow it to expand
-            self.tvcolumn.pack_start(self.cell, True)
+    #         # add the cell to the tvcolumn and allow it to expand
+    #         self.tvcolumn.pack_start(self.cell, True)
 
-            # set the cell "text" attribute to column 0 - retrieve text
-            # from that column in treestore
-            self.tvcolumn.add_attribute(self.cell, 'text', 0)
+    #         # set the cell "text" attribute to column 0 - retrieve text
+    #         # from that column in treestore
+    #         self.tvcolumn.add_attribute(self.cell, 'text', 0)
 
-            # make it searchable
-            self.treeview.set_search_column(0)
+    #         # make it searchable
+    #         self.treeview.set_search_column(0)
 
-            # Allow sorting on the column
-            self.tvcolumn.set_sort_column_id(0)
+    #         # Allow sorting on the column
+    #         self.tvcolumn.set_sort_column_id(0)
 
-            # Allow drag and drop reordering of rows
-            self.treeview.set_reorderable(True)
+    #         # Allow drag and drop reordering of rows
+    #         self.treeview.set_reorderable(True)
 
-            self.hpaned.add2(self.treeview)
-            self.treeview.show()
+    #         self.hpaned.add2(self.treeview)
+    #         self.treeview.show()
 
-            # Signal for tree view goes here
-            self.treeview.connect("row-activated", self.add_remote_tab)
+    #         # Signal for tree view goes here
+    #         self.treeview.connect("row-activated", self.add_remote_tab)
 
     def delete_open(self, widget):
         """Delete open file dialog
@@ -598,6 +694,7 @@ class PyCm(object):
             treeview
         """
         self.treeselection = self.treeview.get_selection()
+        print self.treeselection
         (self.model, self.pathlist) = self.treeselection.get_selected_rows()
 
         for path in self.pathlist :
